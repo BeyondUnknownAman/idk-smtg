@@ -16699,90 +16699,134 @@ local creator = __DIST.d()
 			AutoButtonColor = false,
 			AutomaticSize = Enum.AutomaticSize.XY,
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			BackgroundTransparency = 1,
 			BorderColor3 = Color3.fromRGB(0, 0, 0),
 			BorderSizePixel = 0,
-			Size = UDim2.fromOffset(0, 28),
 			Text = "",
 			Parent = parent,
 
 			create("UICorner")({
-				CornerRadius = UDim.new(0, 6),
+				Name = "UICorner",
+				CornerRadius = UDim.new(0, 5),
 			}),
 
-			create("Frame")({
-				Name = "Background",
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				Size = UDim2.fromScale(1, 1),
+			create("Folder")({
+				Name = "ShadowLayers",
 
-				__dynamicKeys = {
-					BackgroundColor3 = theme.Secondary[1],
-					BackgroundTransparency = theme.Secondary[2],
-				},
-
-				create("UICorner")({
-					CornerRadius = UDim.new(0, 6),
-				}),
-
-				create("UIStroke")({
-					Color = Color3.fromRGB(255, 255, 255),
-					Transparency = 0.85,
-					Thickness = 1,
-
-					__dynamicKeys = {
-						Color = theme.SecondaryStroke[1],
-						Transparency = theme.SecondaryStroke[2],
-					},
-				}),
-
-				create("UIPadding")({
-					PaddingLeft = UDim.new(0, 12),
-					PaddingRight = UDim.new(0, 12),
-				}),
-
-				create("TextLabel")({
-					Name = "Label",
+				create("Frame")({
+					Name = "Layer1",
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 					BackgroundTransparency = 1,
-					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BorderSizePixel = 0,
 					Size = UDim2.fromScale(1, 1),
-					Text = "⌨ " .. properties.Label,
-					TextColor3 = Color3.fromRGB(255, 255, 255),
-					TextSize = 13,
+					ZIndex = 0,
 
-					__dynamicKeys = {
-						TextColor3 = self.Theme.Text.Primary[1],
-						TextTransparency = self.Theme.Text.Primary[2],
-					},
+					create("UICorner")({
+						CornerRadius = UDim.new(0, 5),
+					}),
+
+					create("UIStroke")({
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+						Transparency = 0.95,
+
+						__dynamicKeys = {
+							Color = theme.Shadow,
+						},
+					}),
+				}),
+			}),
+
+			create("Folder")({
+				Name = "PressOverlay",
+
+				create("Frame")({
+					Name = "Overlay",
+					BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					Size = UDim2.fromScale(1, 1),
+					ZIndex = 0,
+
+					create("UICorner")({
+						CornerRadius = UDim.new(0, 5),
+					}),
 				}),
 			}),
 		})
-	)
+	) :: TextButton
 
-	-- Hover effect
-	structures.Body.__instance.MouseEnter:Connect(function()
-		tweenService:Create(structures.Body.Background.__instance, TweenInfo.new(0.15), {
-			BackgroundTransparency = 0.7,
-		}):Play()
-	end)
+	--// Initialize
+	structures.PressOverlay = structures.Body:FindFirstChild("PressOverlay"):FindFirstChild("Overlay")
 
-	structures.Body.__instance.MouseLeave:Connect(function()
-		tweenService:Create(structures.Body.Background.__instance, TweenInfo.new(0.15), {
-			BackgroundTransparency = theme.Secondary[2].Value,
-		}):Play()
-	end)
+	structures.Label = create("TextLabel")({
+		Size = UDim2.fromScale(1, 1),
+		Name = "Label",
+		AutomaticSize = Enum.AutomaticSize.XY,
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 1,
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BorderSizePixel = 0,
+		FontFace = Font.new("rbxassetid://12187365364"),
+		RichText = true,
+		TextSize = 14,
+		TextWrapped = true,
+		TextXAlignment = Enum.TextXAlignment.Center,
+		TextYAlignment = Enum.TextYAlignment.Center,
+		Text = "⌨ " .. properties.Label,
+		Parent = structures.Body.__instance,
+
+		__dynamicKeys = {
+			TextColor3 = self.Theme.Text.Primary[1],
+			TextTransparency = self.Theme.Text.Primary[2],
+		},
+
+		create("UIPadding")({
+			PaddingBottom = UDim.new(0, 3),
+			PaddingLeft = UDim.new(0, 7),
+			PaddingRight = UDim.new(0, 7),
+			PaddingTop = UDim.new(0, 3),
+		}),
+	}) :: TextLabel
+
+	structures.Fill = create("UIGradient")({
+		Name = "UIGradient",
+		Rotation = 90,
+		Parent = structures.Body.__instance,
+
+		__dynamicKeys = {
+			Color = theme.FillSecondary,
+		},
+	}) :: UIGradient
 
 	-- Toggle overlay on click
 	structures.Body.__instance.MouseButton1Click:Connect(function()
 		keybindOverlay.Toggle()
 	end)
 
-	structures.Body.Type = "KeybindsButton"
-	structures.Body.Theme = self.Theme
-	structures.Body.Structures = structures
+	-- Press animation
+	local function animateRelease()
+		tweenService:Create(structures.PressOverlay, TweenInfo.new(0.12, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+			BackgroundTransparency = 1,
+		}):Play()
+	end
 
-	binder.Apply(properties, structures.Body)
+	structures.Body.__instance.MouseButton1Down:Connect(function()
+		tweenService:Create(structures.PressOverlay, TweenInfo.new(0.08, Enum.EasingStyle.Cubic, Enum.EasingDirection.Out), {
+			BackgroundTransparency = 0.8,
+		}):Play()
+	end)
 
-	return structures.Body
+	structures.Body.__instance.MouseButton1Up:Connect(animateRelease)
+	structures.Body.__instance.MouseLeave:Connect(animateRelease)
+
+	local object = binder.Wrap(properties, {}, structures.Body)
+	object.Type = "KeybindsButton"
+	object.Theme = self.Theme
+	object.Structures = structures
+
+	binder.Apply(properties, object)
+
+	return object
 end
 end function __DIST.R():typeof(__modImpl())local v=__DIST.cache.R if not v then v={c=__modImpl()}__DIST.cache.R=v end return v.c end end do local function __modImpl()--// Imports
 
