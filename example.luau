@@ -1,7 +1,7 @@
 --[[
-    Cascade UI Example Script with Keybind Overlay
+    Cascade UI Example with Keybind Overlay
     RightControl = toggle menu
-    UI Settings tab has a toggle for the keybinds panel
+    UI Settings tab has toggle for keybinds panel
 ]]
 
 local ok, err = pcall(function()
@@ -20,189 +20,236 @@ local ok, err = pcall(function()
         Size = UDim2.fromOffset(850, 530),
     })
 
-    local function titledRow(parent, title, subtitle)
-        local row = parent:Row()
-        row:Left():TitleStack({ Title = title, Subtitle = subtitle })
-        return row
-    end
-
-    -- One section, multiple tabs
-    local section = window:Section({
-        Disclosure = false,
-        Title = "Features",
-    })
+    local section = window:Section({ Title = "Features" })
 
     -- ========================================
     -- MAIN TAB
     -- ========================================
-    local mainTab = section:Tab({
-        Selected = true,
-        Title = "Main",
-    })
+    local mainTab = section:Tab({ Selected = true, Title = "Main" })
 
-    local mainForm = mainTab:Form()
+    do -- Combat
+        local form = mainTab:PageSection({ Title = "Combat", Subtitle = "Combat features" }):Form()
 
-    mainForm:PageSection({ Title = "Combat", Subtitle = "Combat features" })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Aimbot", Subtitle = "Locks on to nearest player" })
+            row:Right():Toggle({ Value = false, ValueChanged = function(self, val) print("Aimbot:", val) end })
+        end
 
-    titledRow(mainForm, "Aimbot", "Locks on to nearest player"):Right():Toggle({
-        Value = false,
-        ValueChanged = function(self, val) print("Aimbot:", val) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Aimbot Keybind" })
+            row:Right():KeybindField({
+                Label = "Aimbot", Value = Enum.KeyCode.Q,
+                OverlayKeybind = true,
+                OverlayToggled = function(self, on) print("Aimbot:", on) end,
+            })
+        end
 
-    titledRow(mainForm, "Aimbot Keybind"):Right():KeybindField({
-        Label = "Aimbot",
-        Value = Enum.KeyCode.Q,
-        OverlayKeybind = true,
-        OverlayToggled = function(self, on) print("Aimbot:", on) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "FOV Radius", Subtitle = "Aimbot field of view" })
+            row:Right():Slider({ Minimum = 0, Maximum = 500, Value = 120, ValueChanged = function(self, val) print("FOV:", val) end })
+        end
 
-    titledRow(mainForm, "FOV Radius", "Aimbot field of view"):Right():Slider({
-        Minimum = 0, Maximum = 500, Value = 120,
-        ValueChanged = function(self, val) print("FOV:", val) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Silent Aim", Subtitle = "Redirects bullets silently" })
+            row:Right():Toggle({ Value = false, ValueChanged = function(self, val) print("Silent Aim:", val) end })
+        end
+    end
 
-    titledRow(mainForm, "Silent Aim", "Redirects bullets silently"):Right():Toggle({
-        Value = false,
-        ValueChanged = function(self, val) print("Silent Aim:", val) end,
-    })
+    do -- Movement
+        local form = mainTab:PageSection({ Title = "Movement", Subtitle = "Movement features" }):Form()
 
-    mainForm:PageSection({ Title = "Movement", Subtitle = "Movement features" })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Fly", Subtitle = "Fly around the map" })
+            row:Right():Toggle({ Value = false, ValueChanged = function(self, val) print("Fly:", val) end })
+        end
 
-    titledRow(mainForm, "Fly", "Fly around the map"):Right():Toggle({
-        Value = false,
-        ValueChanged = function(self, val) print("Fly:", val) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Fly Keybind" })
+            row:Right():KeybindField({
+                Label = "Fly", Value = Enum.KeyCode.F,
+                OverlayKeybind = true,
+                OverlayToggled = function(self, on) print("Fly:", on) end,
+            })
+        end
 
-    titledRow(mainForm, "Fly Keybind"):Right():KeybindField({
-        Label = "Fly",
-        Value = Enum.KeyCode.F,
-        OverlayKeybind = true,
-        OverlayToggled = function(self, on) print("Fly:", on) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Walk Speed", Subtitle = "Change walk speed" })
+            row:Right():Slider({ Minimum = 16, Maximum = 200, Value = 16, ValueChanged = function(self, val) print("Speed:", val) end })
+        end
 
-    titledRow(mainForm, "Walk Speed", "Change walk speed"):Right():Slider({
-        Minimum = 16, Maximum = 200, Value = 16,
-        ValueChanged = function(self, val) print("Speed:", val) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Speed Keybind" })
+            row:Right():KeybindField({
+                Label = "Speed", Value = Enum.KeyCode.V,
+                OverlayKeybind = true,
+                OverlayToggled = function(self, on) print("Speed:", on) end,
+            })
+        end
 
-    titledRow(mainForm, "Speed Keybind"):Right():KeybindField({
-        Label = "Speed",
-        Value = Enum.KeyCode.V,
-        OverlayKeybind = true,
-        OverlayToggled = function(self, on) print("Speed:", on) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Noclip", Subtitle = "Walk through walls" })
+            row:Right():Toggle({ Value = false, ValueChanged = function(self, val) print("Noclip:", val) end })
+        end
 
-    titledRow(mainForm, "Noclip", "Walk through walls"):Right():Toggle({
-        Value = false,
-        ValueChanged = function(self, val) print("Noclip:", val) end,
-    })
-
-    titledRow(mainForm, "Infinite Jump", "Jump in mid-air"):Right():Toggle({
-        Value = false,
-        ValueChanged = function(self, val) print("Inf Jump:", val) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Infinite Jump", Subtitle = "Jump in mid-air" })
+            row:Right():Toggle({ Value = false, ValueChanged = function(self, val) print("Inf Jump:", val) end })
+        end
+    end
 
     -- ========================================
     -- VISUALS TAB
     -- ========================================
     local visualsTab = section:Tab({ Title = "Visuals" })
-    local visualsForm = visualsTab:Form()
 
-    visualsForm:PageSection({ Title = "ESP", Subtitle = "Player ESP" })
+    do -- ESP
+        local form = visualsTab:PageSection({ Title = "ESP", Subtitle = "Player ESP" }):Form()
 
-    titledRow(visualsForm, "ESP Enabled", "Show players through walls"):Right():Toggle({
-        Value = false,
-        ValueChanged = function(self, val) print("ESP:", val) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "ESP Enabled", Subtitle = "Show players through walls" })
+            row:Right():Toggle({ Value = false, ValueChanged = function(self, val) print("ESP:", val) end })
+        end
 
-    titledRow(visualsForm, "ESP Keybind"):Right():KeybindField({
-        Label = "ESP",
-        Value = Enum.KeyCode.E,
-        OverlayKeybind = true,
-        OverlayToggled = function(self, on) print("ESP:", on) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "ESP Keybind" })
+            row:Right():KeybindField({
+                Label = "ESP", Value = Enum.KeyCode.E,
+                OverlayKeybind = true,
+                OverlayToggled = function(self, on) print("ESP:", on) end,
+            })
+        end
 
-    titledRow(visualsForm, "Box ESP", "Draw boxes around players"):Right():Toggle({ Value = true })
-    titledRow(visualsForm, "Name ESP", "Show player names"):Right():Toggle({ Value = true })
-    titledRow(visualsForm, "Health Bar", "Show health bars"):Right():Toggle({ Value = true })
-    titledRow(visualsForm, "Tracers", "Draw lines to players"):Right():Toggle({ Value = false })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Box ESP", Subtitle = "Draw boxes around players" })
+            row:Right():Toggle({ Value = true })
+        end
 
-    titledRow(visualsForm, "Render Distance", "Max ESP distance"):Right():Slider({
-        Minimum = 100, Maximum = 10000, Value = 2000,
-        ValueChanged = function(self, val) print("Render Dist:", val) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Name ESP", Subtitle = "Show player names" })
+            row:Right():Toggle({ Value = true })
+        end
 
-    visualsForm:PageSection({ Title = "World", Subtitle = "World effects" })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Health Bar", Subtitle = "Show health bars" })
+            row:Right():Toggle({ Value = true })
+        end
 
-    titledRow(visualsForm, "Fullbright", "Remove all darkness"):Right():Toggle({
-        Value = false,
-        ValueChanged = function(self, val) print("Fullbright:", val) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Tracers", Subtitle = "Draw lines to players" })
+            row:Right():Toggle({ Value = false })
+        end
 
-    titledRow(visualsForm, "No Fog", "Remove fog"):Right():Toggle({
-        Value = false,
-        ValueChanged = function(self, val) print("No Fog:", val) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Render Distance", Subtitle = "Max ESP distance" })
+            row:Right():Slider({ Minimum = 100, Maximum = 10000, Value = 2000, ValueChanged = function(self, val) print("Render Dist:", val) end })
+        end
+    end
+
+    do -- World
+        local form = visualsTab:PageSection({ Title = "World", Subtitle = "World effects" }):Form()
+
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Fullbright", Subtitle = "Remove all darkness" })
+            row:Right():Toggle({ Value = false, ValueChanged = function(self, val) print("Fullbright:", val) end })
+        end
+
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "No Fog", Subtitle = "Remove fog" })
+            row:Right():Toggle({ Value = false, ValueChanged = function(self, val) print("No Fog:", val) end })
+        end
+    end
 
     -- ========================================
     -- MISC TAB
     -- ========================================
     local miscTab = section:Tab({ Title = "Misc" })
-    local miscForm = miscTab:Form()
 
-    miscForm:PageSection({ Title = "Player", Subtitle = "Player features" })
+    do -- Player
+        local form = miscTab:PageSection({ Title = "Player", Subtitle = "Player features" }):Form()
 
-    titledRow(miscForm, "God Mode", "Take no damage"):Right():Toggle({
-        Value = false,
-        ValueChanged = function(self, val) print("God Mode:", val) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "God Mode", Subtitle = "Take no damage" })
+            row:Right():Toggle({ Value = false, ValueChanged = function(self, val) print("God Mode:", val) end })
+        end
 
-    titledRow(miscForm, "God Mode Keybind"):Right():KeybindField({
-        Label = "God Mode",
-        Value = Enum.KeyCode.G,
-        OverlayKeybind = true,
-        OverlayToggled = function(self, on) print("God Mode:", on) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "God Mode Keybind" })
+            row:Right():KeybindField({
+                Label = "God Mode", Value = Enum.KeyCode.G,
+                OverlayKeybind = true,
+                OverlayToggled = function(self, on) print("God Mode:", on) end,
+            })
+        end
 
-    titledRow(miscForm, "Max Health", "Set max health"):Right():Slider({
-        Minimum = 1, Maximum = 1000, Value = 100,
-        ValueChanged = function(self, val) print("Max HP:", val) end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Max Health", Subtitle = "Set max health" })
+            row:Right():Slider({ Minimum = 1, Maximum = 1000, Value = 100, ValueChanged = function(self, val) print("Max HP:", val) end })
+        end
+    end
 
-    miscForm:PageSection({ Title = "Fun", Subtitle = "Fun stuff" })
+    do -- Fun
+        local form = miscTab:PageSection({ Title = "Fun", Subtitle = "Fun stuff" }):Form()
 
-    titledRow(miscForm, "Teleport", "Teleport to mouse"):Right():Button({
-        Label = "Teleport",
-        State = "Primary",
-        Pushed = function(self) print("Teleported!") end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Teleport", Subtitle = "Teleport to mouse" })
+            row:Right():Button({ Label = "Teleport", State = "Primary", Pushed = function(self) print("Teleported!") end })
+        end
 
-    titledRow(miscForm, "Respawn", "Force respawn"):Right():Button({
-        Label = "Respawn",
-        State = "Secondary",
-        Pushed = function(self) print("Respawned!") end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Respawn", Subtitle = "Force respawn" })
+            row:Right():Button({ Label = "Respawn", State = "Secondary", Pushed = function(self) print("Respawned!") end })
+        end
 
-    titledRow(miscForm, "Destroy All", "Destroy all parts"):Right():Button({
-        Label = "Destroy",
-        State = "Destructive",
-        Pushed = function(self) print("Destroyed!") end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Destroy All", Subtitle = "Destroy all parts" })
+            row:Right():Button({ Label = "Destroy", State = "Destructive", Pushed = function(self) print("Destroyed!") end })
+        end
+    end
 
     -- ========================================
     -- UI SETTINGS TAB
     -- ========================================
     local settingsTab = section:Tab({ Title = "UI Settings" })
-    local settingsForm = settingsTab:Form()
 
-    settingsForm:PageSection({ Title = "Menu", Subtitle = "UI options" })
+    do -- Menu
+        local form = settingsTab:PageSection({ Title = "Menu", Subtitle = "UI options" }):Form()
 
-    titledRow(settingsForm, "Keybinds Menu", "Show/hide keybinds panel"):Right():Toggle({
-        Value = false,
-        ValueChanged = function(self, value)
-            app.KeybindOverlay.SetVisible(value)
-        end,
-    })
+        do
+            local row = form:Row()
+            row:Left():TitleStack({ Title = "Keybinds Menu", Subtitle = "Show/hide keybinds panel" })
+            row:Right():Toggle({
+                Value = false,
+                ValueChanged = function(self, value)
+                    app.KeybindOverlay.SetVisible(value)
+                end,
+            })
+        end
+    end
 
     print("Cascade Demo loaded! RightControl = toggle menu")
 end)
