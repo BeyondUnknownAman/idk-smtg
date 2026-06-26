@@ -1970,65 +1970,49 @@ return AppRecorder
 end function __DIST.f():typeof(__modImpl())local v=__DIST.cache.f if not v then v={c=__modImpl()}__DIST.cache.f=v end return v.c end end do local function __modImpl()--// Imports
 
 local creator = __DIST.d()
-local binder = __DIST.c()
 local services = __DIST.e()
 
 --// References
 local create = creator.Create
 local userInputService = services.UserInputService
-local tweenService = services.TweenService
 
 --// Variables
 local overlay = {}
-
 local registeredKeybinds = {}
 local nextId = 0
-
 local overlayFrame = nil
 local overlayContainer = nil
 local overlayVisible = false
-local overlayTheme = nil
 
---// Private: create entry row for a single keybind
-local function createKeybindEntry(keybindData)
-	if not overlayContainer then return end
+--// Private: create entry row
+local function createKeybindEntry(data)
+	if not overlayContainer then
+		warn("[Overlay] No container, skipping entry:", data.label)
+		return
+	end
 
-	local theme = overlayTheme
-	local controls = theme and theme.Controls
-	local textTheme = theme and theme.Text
+	print("[Overlay] Creating entry:", data.label)
 
 	local holder = create("Frame")({
-		Name = "KeybindEntry",
+		Name = "Entry_" .. data.label,
 		BackgroundTransparency = 1,
 		Size = UDim2.new(1, 0, 0, 22),
 		Parent = overlayContainer.__instance,
 	})
 
 	local checkbox = create("Frame")({
-		Name = "Checkbox",
+		Name = "CB",
 		AnchorPoint = Vector2.new(0, 0.5),
 		Position = UDim2.new(0, 0, 0.5, 0),
 		Size = UDim2.fromOffset(14, 14),
-		BackgroundTransparency = 0,
-		Parent = holder,
-
-		create("UICorner")({
-			CornerRadius = UDim.new(0, 4),
-		}),
-
-		create("UIStroke")({
-			Thickness = 1,
-		}),
+		BackgroundColor3 = Color3.fromRGB(50, 50, 52),
+		Parent = holder.__instance,
+		create("UICorner")({ CornerRadius = UDim.new(0, 3) }),
+		create("UIStroke")({ Color = Color3.fromRGB(255,255,255), Transparency = 0.9, Thickness = 1 }),
 	})
 
-	-- Apply theme colors to checkbox
-	local cbInstance = checkbox.__instance
-	if controls and controls.SwitchAccent then
-		-- We'll set initial colors and update on toggle
-	end
-
-	local checkMark = create("TextLabel")({
-		Name = "CheckMark",
+	local check = create("TextLabel")({
+		Name = "Check",
 		BackgroundTransparency = 1,
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		Position = UDim2.fromScale(0.5, 0.5),
@@ -2036,8 +2020,9 @@ local function createKeybindEntry(keybindData)
 		Text = "✓",
 		TextSize = 10,
 		FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold),
+		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextTransparency = 1,
-		Parent = checkbox,
+		Parent = checkbox.__instance,
 	})
 
 	local label = create("TextLabel")({
@@ -2048,120 +2033,89 @@ local function createKeybindEntry(keybindData)
 		Text = "",
 		TextSize = 12,
 		FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextTransparency = 0.55,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextTruncate = Enum.TextTruncate.AtEnd,
-		Parent = holder,
+		Parent = holder.__instance,
 	})
 
-	-- Apply theme to label
-	local labelInstance = label.__instance
-	if textTheme and textTheme.Primary then
-		labelInstance.TextColor3 = textTheme.Primary[1].Value
-	end
-
-	-- Update display text
 	local function updateDisplay()
-		local keyName = keybindData.keyCode and keybindData.keyCode.Name or "None"
-		local state = keybindData.toggled and "ON" or "OFF"
-		labelInstance.Text = string.format("[%s] %s (%s)", keyName, keybindData.label, state)
-
-		if keybindData.toggled then
-			labelInstance.TextTransparency = textTheme and textTheme.Primary and textTheme.Primary[2].Value or 0.15
-			cbInstance.BackgroundColor3 = controls and controls.SwitchAccent and controls.SwitchAccent[1].Value or Color3.fromRGB(71, 140, 246)
-			cbInstance.BackgroundTransparency = controls and controls.SwitchAccent and controls.SwitchAccent[2].Value or 0
-			checkMark.__instance.TextTransparency = 0
-		else
-			labelInstance.TextTransparency = 0.55
-			cbInstance.BackgroundColor3 = controls and controls.View and controls.View[1].Value or Color3.fromRGB(31, 31, 33)
-			cbInstance.BackgroundTransparency = 0
-			checkMark.__instance.TextTransparency = 1
-		end
-
-		-- Stroke color
-		local stroke = cbInstance:FindFirstChild("UIStroke")
-		if stroke then
-			stroke.Color = controls and controls.ViewBorder and controls.ViewBorder[1].Value or Color3.fromRGB(255, 255, 255)
-			stroke.Transparency = controls and controls.ViewBorder and controls.ViewBorder[2].Value or 0.95
-		end
+		local keyName = data.keyCode and data.keyCode.Name or "None"
+		local state = data.toggled and "ON" or "OFF"
+		label.__instance.Text = string.format("[%s] %s (%s)", keyName, data.label, state)
+		label.__instance.TextTransparency = data.toggled and 0.15 or 0.55
+		checkbox.__instance.BackgroundColor3 = data.toggled and Color3.fromRGB(71, 140, 246) or Color3.fromRGB(50, 50, 52)
+		check.__instance.TextTransparency = data.toggled and 0 or 1
 	end
 	updateDisplay()
 
-	-- Click to toggle
-	local clickButton = create("TextButton")({
-		Name = "ClickTarget",
+	local click = create("TextButton")({
+		Name = "Click",
 		BackgroundTransparency = 1,
 		Size = UDim2.fromScale(1, 1),
 		Text = "",
-		Parent = holder,
+		Parent = holder.__instance,
 	})
 
-	clickButton.__instance.MouseButton1Click:Connect(function()
-		keybindData.toggled = not keybindData.toggled
+	click.__instance.MouseButton1Click:Connect(function()
+		data.toggled = not data.toggled
 		updateDisplay()
-		if keybindData.onToggle then
-			task.spawn(keybindData.onToggle, keybindData.toggled)
+		if data.onToggle then
+			task.spawn(data.onToggle, data.toggled)
 		end
 	end)
 
-	keybindData.entry = holder
-	keybindData._updateDisplay = updateDisplay
+	data.entry = holder
+	data._update = updateDisplay
 end
 
 --// Public API
 
-function overlay.Register(labelText: string, keyCode: Enum.KeyCode?, options: {}?)
+function overlay.Register(labelText, keyCode, options)
 	nextId += 1
 	local id = nextId
-
-	local keybindData = {
+	local data = {
 		id = id,
 		label = labelText or "Keybind",
 		keyCode = keyCode,
 		toggled = false,
 		onToggle = options and options.onToggle,
-		entry = nil,
 	}
+	registeredKeybinds[id] = data
 
-	registeredKeybinds[id] = keybindData
+	print("[Overlay] Registered:", labelText, "keyCode:", keyCode, "container:", overlayContainer and "yes" or "nil")
 
 	if overlayContainer then
-		createKeybindEntry(keybindData)
+		createKeybindEntry(data)
 	end
 
 	return {
-		id = id,
-		SetKeyCode = function(_, newKeyCode: Enum.KeyCode)
-			keybindData.keyCode = newKeyCode
-			if keybindData._updateDisplay then
-				keybindData._updateDisplay()
-			end
+		SetKeyCode = function(_, kc)
+			data.keyCode = kc
+			if data._update then data._update() end
 		end,
-		SetToggled = function(_, state: boolean)
-			keybindData.toggled = state
-			if keybindData._updateDisplay then
-				keybindData._updateDisplay()
-			end
+		SetToggled = function(_, s)
+			data.toggled = s
+			if data._update then data._update() end
 		end,
-		GetToggled = function(_): boolean
-			return keybindData.toggled
+		GetToggled = function(_)
+			return data.toggled
 		end,
-		SetLabel = function(_, newLabel: string)
-			keybindData.label = newLabel
-			if keybindData._updateDisplay then
-				keybindData._updateDisplay()
-			end
+		SetLabel = function(_, l)
+			data.label = l
+			if data._update then data._update() end
 		end,
 		Remove = function(_)
-			if keybindData.entry then
-				keybindData.entry:Destroy()
-			end
+			if data.entry then data.entry:Destroy() end
 			registeredKeybinds[id] = nil
 		end,
 	}
 end
 
-function overlay.SetVisible(visible: boolean)
+function overlay.SetVisible(visible)
 	overlayVisible = visible
+	print("[Overlay] SetVisible:", visible, "frame:", overlayFrame and "yes" or "nil")
 	if overlayFrame then
 		overlayFrame.__instance.Visible = visible
 	end
@@ -2171,83 +2125,66 @@ function overlay.Toggle()
 	overlay.SetVisible(not overlayVisible)
 end
 
-function overlay.IsVisible(): boolean
+function overlay.IsVisible()
 	return overlayVisible
 end
 
-function overlay.HasEntries(): boolean
-	for _ in pairs(registeredKeybinds) do
-		return true
-	end
-	return false
+function overlay.HasEntries()
+	local count = 0
+	for _ in pairs(registeredKeybinds) do count += 1 end
+	return count > 0
 end
 
-function overlay.Build(parentGui: Instance, theme: any)
-	overlayTheme = theme
+function overlay.Build(parentGui, theme)
+	print("[Overlay] Build called, parent:", parentGui)
 
-	local controls = theme and theme.Controls
-	local textTheme = theme and theme.Text
+	local bgColor = Color3.fromRGB(28, 28, 30)
+	local titleColor = Color3.fromRGB(255, 255, 255)
 
-	-- Get colors from theme
-	local bgColor = controls and controls.Background and controls.Background[1].Value or Color3.fromRGB(28, 28, 30)
-	local bgTransparency = controls and controls.Background and controls.Background[2].Value or 0.05
-	local borderColor = controls and controls.ViewBorder and controls.ViewBorder[1].Value or Color3.fromRGB(255, 255, 255)
-	local borderTransparency = controls and controls.ViewBorder and controls.ViewBorder[2].Value or 0.92
-	local titlebarColor = controls and controls.Titlebar and controls.Titlebar[1].Value or Color3.fromRGB(54, 54, 54)
-	local titlebarTransparency = controls and controls.Titlebar and controls.Titlebar[2].Value or 0
-	local titleColor = textTheme and textTheme.Primary and textTheme.Primary[1].Value or Color3.fromRGB(255, 255, 255)
-	local titleTransparency = textTheme and textTheme.Primary and textTheme.Primary[2].Value or 0.15
-	local separatorColor = controls and controls.Separator and controls.Separator.Background and controls.Separator.Background[1].Value or Color3.fromRGB(255, 255, 255)
-	local separatorTransparency = controls and controls.Separator and controls.Separator.Background and controls.Separator.Background[2].Value or 0.9
+	-- Try to use theme colors
+	if theme and theme.Controls then
+		local c = theme.Controls
+		if c.Background and c.Background[1] then bgColor = c.Background[1].Value end
+	end
+	if theme and theme.Text and theme.Text.Primary and theme.Text.Primary[1] then
+		titleColor = theme.Text.Primary[1].Value
+	end
 
-	-- Main floating frame
 	overlayFrame = create("Frame")({
 		Name = "KeybindOverlay",
 		AnchorPoint = Vector2.new(0, 0.5),
 		BackgroundColor3 = bgColor,
-		BackgroundTransparency = bgTransparency,
+		BackgroundTransparency = 0.05,
 		Position = UDim2.new(0, 8, 0.5, 0),
 		Size = UDim2.fromOffset(210, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
 		Visible = false,
 		ZIndex = 10,
 		Parent = parentGui,
-
-		create("UICorner")({
-			CornerRadius = UDim.new(0, 8),
-		}),
-
-		create("UIStroke")({
-			Color = borderColor,
-			Transparency = borderTransparency,
-			Thickness = 1,
-		}),
+		create("UICorner")({ CornerRadius = UDim.new(0, 8) }),
+		create("UIStroke")({ Color = Color3.fromRGB(255,255,255), Transparency = 0.92, Thickness = 1 }),
 	})
+
+	print("[Overlay] Frame created:", overlayFrame.__instance)
 
 	-- Title bar
 	local titleBar = create("Frame")({
 		Name = "TitleBar",
-		BackgroundColor3 = titlebarColor,
-		BackgroundTransparency = titlebarTransparency,
+		BackgroundColor3 = Color3.fromRGB(54, 54, 54),
 		Size = UDim2.new(1, 0, 0, 30),
 		Parent = overlayFrame.__instance,
-
-		create("UICorner")({
-			CornerRadius = UDim.new(0, 8),
-		}),
-
+		create("UICorner")({ CornerRadius = UDim.new(0, 8) }),
 		create("Frame")({
 			Name = "BottomFix",
 			AnchorPoint = Vector2.new(0, 1),
-			BackgroundColor3 = titlebarColor,
-			BackgroundTransparency = titlebarTransparency,
+			BackgroundColor3 = Color3.fromRGB(54, 54, 54),
 			BorderSizePixel = 0,
 			Position = UDim2.fromScale(0, 1),
 			Size = UDim2.new(1, 0, 0, 8),
 		}),
 	})
 
-	local titleLabel = create("TextLabel")({
+	create("TextLabel")({
 		Name = "Title",
 		BackgroundTransparency = 1,
 		Position = UDim2.fromOffset(10, 0),
@@ -2256,36 +2193,31 @@ function overlay.Build(parentGui: Instance, theme: any)
 		TextSize = 13,
 		FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold),
 		TextColor3 = titleColor,
-		TextTransparency = titleTransparency,
+		TextTransparency = 0.15,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		Parent = titleBar.__instance,
 	})
 
-	-- Separator line
+	-- Separator
 	create("Frame")({
-		Name = "Separator",
-		BackgroundColor3 = separatorColor,
-		BackgroundTransparency = separatorTransparency,
+		Name = "Sep",
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 0.9,
 		BorderSizePixel = 0,
 		Position = UDim2.fromOffset(0, 30),
 		Size = UDim2.new(1, 0, 0, 1),
 		Parent = overlayFrame.__instance,
 	})
 
-	-- Container for keybind entries
+	-- Container
 	overlayContainer = create("Frame")({
-		Name = "KeybindContainer",
+		Name = "Container",
 		BackgroundTransparency = 1,
 		Position = UDim2.fromOffset(0, 31),
 		Size = UDim2.new(1, 0, 0, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
 		Parent = overlayFrame.__instance,
-
-		create("UIListLayout")({
-			Padding = UDim.new(0, 3),
-			SortOrder = Enum.SortOrder.LayoutOrder,
-		}),
-
+		create("UIListLayout")({ Padding = UDim.new(0, 3) }),
 		create("UIPadding")({
 			PaddingBottom = UDim.new(0, 8),
 			PaddingLeft = UDim.new(0, 8),
@@ -2294,56 +2226,41 @@ function overlay.Build(parentGui: Instance, theme: any)
 		}),
 	})
 
-	-- Make draggable by title bar
-	do
-		local dragging = false
-		local inputPos = nil
-		local startPos = nil
-		local connection = nil
+	print("[Overlay] Container created:", overlayContainer.__instance)
 
-		titleBar.__instance.InputBegan:Connect(function(input)
-			if
-				input.UserInputType == Enum.UserInputType.MouseButton1
-				or input.UserInputType == Enum.UserInputType.Touch
-			then
-				dragging = true
-				inputPos = input.Position
-				startPos = overlayFrame.__instance.Position
+	-- Dragging
+	local dragging = false
+	local inputPos, startPos, connection
 
-				if connection then
-					connection:Disconnect()
-				end
+	titleBar.__instance.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			inputPos = input.Position
+			startPos = overlayFrame.__instance.Position
+			if connection then connection:Disconnect() end
+			connection = input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then dragging = false end
+			end)
+		end
+	end)
 
-				connection = input.Changed:Connect(function()
-					if input.UserInputState == Enum.UserInputState.End then
-						dragging = false
-					end
-				end)
-			end
-		end)
+	userInputService.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - inputPos
+			overlayFrame.__instance.Position = UDim2.new(
+				startPos.X.Scale, startPos.X.Offset + delta.X,
+				startPos.Y.Scale, startPos.Y.Offset + delta.Y
+			)
+		end
+	end)
 
-		userInputService.InputChanged:Connect(function(input)
-			if
-				input.UserInputType == Enum.UserInputType.MouseMovement
-				or input.UserInputType == Enum.UserInputType.Touch
-			then
-				if dragging then
-					local delta = input.Position - inputPos
-					overlayFrame.__instance.Position = UDim2.new(
-						startPos.X.Scale,
-						startPos.X.Offset + delta.X,
-						startPos.Y.Scale,
-						startPos.Y.Offset + delta.Y
-					)
-				end
-			end
-		end)
+	-- Create entries for already-registered keybinds
+	print("[Overlay] Building existing entries, count:", (function() local c=0; for _ in pairs(registeredKeybinds) do c+=1 end; return c end)())
+	for _, data in pairs(registeredKeybinds) do
+		createKeybindEntry(data)
 	end
 
-	-- Build entries for already-registered keybinds
-	for _, keybindData in pairs(registeredKeybinds) do
-		createKeybindEntry(keybindData)
-	end
+	print("[Overlay] Build complete!")
 end
 
 return overlay
