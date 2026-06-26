@@ -11874,17 +11874,20 @@ local effects = __DIST.j()
 	--// Keybinds overlay toggle button in titlebar
 	local keybindOverlay = __DIST.g()
 
-	local trailing = structures.Titlebar.Trailing
-	local trailingParent = typeof(trailing) == "table" and trailing.__instance or trailing
+	-- Parent to ContentBody (right side), positioned absolutely to avoid search field conflicts
+	local contentBody = structures.ContentBody
+	local contentBodyParent = typeof(contentBody) == "table" and contentBody.__instance or contentBody
 
 	local keybindsButton = create("ImageButton")({
 		Name = "KeybindsToggle",
 		AutoButtonColor = false,
+		AnchorPoint = Vector2.new(1, 0),
 		BackgroundTransparency = 1,
+		Position = UDim2.new(1, -8, 0, 12),
 		Size = UDim2.fromOffset(28, 28),
-		LayoutOrder = -1,
 		Visible = false,
-		Parent = trailingParent,
+		ZIndex = 5,
+		Parent = contentBodyParent,
 	})
 
 	local keybindsIcon = create("TextLabel")({
@@ -11893,6 +11896,7 @@ local effects = __DIST.j()
 		Size = UDim2.fromScale(1, 1),
 		Text = "⌨",
 		TextSize = 14,
+		ZIndex = 5,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextTransparency = 0.3,
 		Parent = keybindsButton.__instance,
