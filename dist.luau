@@ -16709,7 +16709,7 @@ local creator = __DIST.d()
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Center,
 		TextYAlignment = Enum.TextYAlignment.Center,
-		Text = "⌨ " .. properties.Label,
+		Text = properties.Label,
 		Parent = structures.Body.__instance,
 
 		__dynamicKeys = {
