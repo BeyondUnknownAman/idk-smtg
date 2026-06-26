@@ -13412,6 +13412,15 @@ local binder = __DIST.c()
 			structures.Field:ReleaseFocus()
 		elseif input.KeyCode == properties.Value and properties.BindPressed then
 			properties.BindPressed(object, input.KeyCode, true, gameProcessedEvent)
+
+			-- Toggle overlay entry when keybind is pressed
+			if object._overlayHandle then
+				local newState = not object._overlayHandle:GetToggled()
+				object._overlayHandle:SetToggled(newState)
+				if properties.OverlayToggled then
+					task.spawn(properties.OverlayToggled, object, newState)
+				end
+			end
 		end
 	end)
 
