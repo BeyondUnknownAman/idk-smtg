@@ -13410,8 +13410,10 @@ local binder = __DIST.c()
 		if structures.Field:IsFocused() then
 			object.Value = input.KeyCode
 			structures.Field:ReleaseFocus()
-		elseif input.KeyCode == properties.Value and properties.BindPressed then
-			properties.BindPressed(object, input.KeyCode, true, gameProcessedEvent)
+		elseif input.KeyCode == properties.Value then
+			if properties.BindPressed then
+				properties.BindPressed(object, input.KeyCode, true, gameProcessedEvent)
+			end
 
 			-- Toggle overlay entry when keybind is pressed
 			if object._overlayHandle then
