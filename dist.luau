@@ -1,3 +1,7 @@
+--!nolint
+--!nocheck
+__SH = { COMPINDEXES = {} }
+
 --// Types
 type ExpectedObject__DARKLUA_TYPE_a = ((...any) -> ...any) | Instance | ServiceProvider
 type Instance__DARKLUA_TYPE_b = {
