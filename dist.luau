@@ -11871,63 +11871,6 @@ local effects = __DIST.j()
 		end)
 	end
 
-	--// Keybinds overlay toggle button in titlebar
-	local keybindOverlay = __DIST.g()
-
-	-- Parent to ContentBody (right side), positioned absolutely to avoid search field conflicts
-	local contentBody = structures.ContentBody
-	local contentBodyParent = typeof(contentBody) == "table" and contentBody.__instance or contentBody
-
-	local keybindsButton = create("ImageButton")({
-		Name = "KeybindsToggle",
-		AutoButtonColor = false,
-		AnchorPoint = Vector2.new(1, 0),
-		BackgroundTransparency = 1,
-		Position = UDim2.new(1, -8, 0, 12),
-		Size = UDim2.fromOffset(28, 28),
-		Visible = false,
-		ZIndex = 5,
-		Parent = contentBodyParent,
-	})
-
-	local keybindsIcon = create("TextLabel")({
-		Name = "Icon",
-		BackgroundTransparency = 1,
-		Size = UDim2.fromScale(1, 1),
-		Text = "⌨",
-		TextSize = 14,
-		ZIndex = 5,
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		TextTransparency = 0.3,
-		Parent = keybindsButton.__instance,
-	})
-
-	-- Hover effect
-	keybindsButton.__instance.MouseEnter:Connect(function()
-		tweenService:Create(keybindsIcon.__instance, TweenInfo.new(0.15), {
-			TextTransparency = 0,
-		}):Play()
-	end)
-
-	keybindsButton.__instance.MouseLeave:Connect(function()
-		tweenService:Create(keybindsIcon.__instance, TweenInfo.new(0.15), {
-			TextTransparency = 0.3,
-		}):Play()
-	end)
-
-	-- Toggle overlay on click
-	keybindsButton.__instance.MouseButton1Click:Connect(function()
-		keybindOverlay.Toggle()
-	end)
-
-	-- Update button visibility when keybinds are registered
-	task.spawn(function()
-		while keybindsButton.__instance and keybindsButton.__instance.Parent do
-			keybindsButton.__instance.Visible = keybindOverlay.HasEntries()
-			task.wait(0.5)
-		end
-	end)
-
 	binder.Apply(properties, object)
 
 	local function recheck() -- Due to roblox resizing issues
@@ -16726,7 +16669,122 @@ local binder = __DIST.c()
 
 	return object
 end
-end function __DIST.Q():typeof(__modImpl())local v=__DIST.cache.Q if not v then v={c=__modImpl()}__DIST.cache.Q=v end return v.c end end do local function __modImpl()--// Imports
+end function __DIST.Q():typeof(__modImpl())local v=__DIST.cache.Q if not v then v={c=__modImpl()}__DIST.cache.Q=v end return v.c end end do local function __modImpl()
+local types = __DIST.b()
+
+return function(self, properties: {}): Button__DARKLUA_TYPE_0	--// Imports
+	
+local creator = __DIST.d()
+	local binder = __DIST.c()
+	local services = __DIST.e()
+	local keybindOverlay = __DIST.g()
+
+	--// References
+	local create = creator.Create
+	local tweenService = services.TweenService
+
+	--// Variables
+	local parent = self.__container or self.__instance or self
+	local theme = self.Theme.Controls.Button
+	local structures = {}
+
+	--// UI
+	properties = properties or {}
+	properties.Label = properties.Label or "Keybinds"
+
+	structures.Body = binder.Apply(
+		properties,
+		create("TextButton")({
+			Name = "KeybindsButton",
+			AutoButtonColor = false,
+			AutomaticSize = Enum.AutomaticSize.XY,
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 1,
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			BorderSizePixel = 0,
+			Size = UDim2.fromOffset(0, 28),
+			Text = "",
+			Parent = parent,
+
+			create("UICorner")({
+				CornerRadius = UDim.new(0, 6),
+			}),
+
+			create("Frame")({
+				Name = "Background",
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				Size = UDim2.fromScale(1, 1),
+
+				__dynamicKeys = {
+					BackgroundColor3 = theme.Secondary[1],
+					BackgroundTransparency = theme.Secondary[2],
+				},
+
+				create("UICorner")({
+					CornerRadius = UDim.new(0, 6),
+				}),
+
+				create("UIStroke")({
+					Color = Color3.fromRGB(255, 255, 255),
+					Transparency = 0.85,
+					Thickness = 1,
+
+					__dynamicKeys = {
+						Color = theme.SecondaryStroke[1],
+						Transparency = theme.SecondaryStroke[2],
+					},
+				}),
+
+				create("UIPadding")({
+					PaddingLeft = UDim.new(0, 12),
+					PaddingRight = UDim.new(0, 12),
+				}),
+
+				create("TextLabel")({
+					Name = "Label",
+					BackgroundTransparency = 1,
+					FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json"),
+					Size = UDim2.fromScale(1, 1),
+					Text = "⌨ " .. properties.Label,
+					TextColor3 = Color3.fromRGB(255, 255, 255),
+					TextSize = 13,
+
+					__dynamicKeys = {
+						TextColor3 = self.Theme.Text.Primary[1],
+						TextTransparency = self.Theme.Text.Primary[2],
+					},
+				}),
+			}),
+		})
+	)
+
+	-- Hover effect
+	structures.Body.__instance.MouseEnter:Connect(function()
+		tweenService:Create(structures.Body.Background.__instance, TweenInfo.new(0.15), {
+			BackgroundTransparency = 0.7,
+		}):Play()
+	end)
+
+	structures.Body.__instance.MouseLeave:Connect(function()
+		tweenService:Create(structures.Body.Background.__instance, TweenInfo.new(0.15), {
+			BackgroundTransparency = theme.Secondary[2].Value,
+		}):Play()
+	end)
+
+	-- Toggle overlay on click
+	structures.Body.__instance.MouseButton1Click:Connect(function()
+		keybindOverlay.Toggle()
+	end)
+
+	structures.Body.Type = "KeybindsButton"
+	structures.Body.Theme = self.Theme
+	structures.Body.Structures = structures
+
+	binder.Apply(properties, structures.Body)
+
+	return structures.Body
+end
+end function __DIST.R():typeof(__modImpl())local v=__DIST.cache.R if not v then v={c=__modImpl()}__DIST.cache.R=v end return v.c end end do local function __modImpl()--// Imports
 
 local binder = __DIST.c()
 local appRecorder = __DIST.f()
@@ -16757,6 +16815,7 @@ local components = {
 ,
 	Notification = __DIST.O(),
 	ImageSurface = __DIST.Q(),
+	KeybindsButton = __DIST.R(),
 }
 
 --// Initialize
@@ -16841,7 +16900,7 @@ function components.register(name: string, make: (any, any) -> any)
 end
 
 return components
-end function __DIST.R():typeof(__modImpl())local v=__DIST.cache.R if not v then v={c=__modImpl()}__DIST.cache.R=v end return v.c end end do local function __modImpl()--// Imports
+end function __DIST.S():typeof(__modImpl())local v=__DIST.cache.S if not v then v={c=__modImpl()}__DIST.cache.S=v end return v.c end end do local function __modImpl()--// Imports
 local creator = __DIST.d()
 
 --// References
@@ -16982,7 +17041,7 @@ return {
 		},
 	},
 }
-end function __DIST.S():typeof(__modImpl())local v=__DIST.cache.S if not v then v={c=__modImpl()}__DIST.cache.S=v end return v.c end end do local function __modImpl()--// Imports
+end function __DIST.T():typeof(__modImpl())local v=__DIST.cache.T if not v then v={c=__modImpl()}__DIST.cache.T=v end return v.c end end do local function __modImpl()--// Imports
 
 local creator = __DIST.d()
 
@@ -17124,12 +17183,12 @@ return {
 		},
 	},
 }
-end function __DIST.T():typeof(__modImpl())local v=__DIST.cache.T if not v then v={c=__modImpl()}__DIST.cache.T=v end return v.c end end do local function __modImpl()
+end function __DIST.U():typeof(__modImpl())local v=__DIST.cache.U if not v then v={c=__modImpl()}__DIST.cache.U=v end return v.c end end do local function __modImpl()
 return {
-	Dark = __DIST.S(),
-	Light = __DIST.T(),
+	Dark = __DIST.T(),
+	Light = __DIST.U(),
 }
-end function __DIST.U():typeof(__modImpl())local v=__DIST.cache.U if not v then v={c=__modImpl()}__DIST.cache.U=v end return v.c end end do local function __modImpl()--// Private Methods
+end function __DIST.V():typeof(__modImpl())local v=__DIST.cache.V if not v then v={c=__modImpl()}__DIST.cache.V=v end return v.c end end do local function __modImpl()--// Private Methods
 
 local function makeGradient(topHex, bottomHex)
 	return ColorSequence.new({
@@ -17294,7 +17353,7 @@ return {
 			Button = { FillPrimary = makeGradient("#626266", "#383838") },
 		},
 	},
-}end function __DIST.V():typeof(__modImpl())local v=__DIST.cache.V if not v then v={c=__modImpl()}__DIST.cache.V=v end return v.c end end end--// Imports
+}end function __DIST.W():typeof(__modImpl())local v=__DIST.cache.W if not v then v={c=__modImpl()}__DIST.cache.W=v end return v.c end end end--// Imports
 
 local utility = __DIST.a()
 local types = __DIST.b()
@@ -17305,10 +17364,10 @@ local appRecorder = __DIST.f()
 local keybindOverlay = __DIST.g()
 
 local symbols = __DIST.h()
-local components = __DIST.R()
+local components = __DIST.S()
 
-local themes = __DIST.U()
-local accents = __DIST.V()
+local themes = __DIST.V()
+local accents = __DIST.W()
 
 --// References
 local create = creator.Create
