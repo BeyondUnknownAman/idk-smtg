@@ -1,7 +1,7 @@
 --[[
     Cascade UI Example Script with Keybind Overlay
-    Shows all UI components — most are placeholders
     RightControl = toggle menu
+    UI Settings tab has a toggle for the keybinds panel
 ]]
 
 local ok, err = pcall(function()
@@ -26,22 +26,22 @@ local ok, err = pcall(function()
         return row
     end
 
+    -- One section, multiple tabs
+    local section = window:Section({
+        Disclosure = false,
+        Title = "Features",
+    })
+
     -- ========================================
     -- MAIN TAB
     -- ========================================
-    local mainSection = window:Section({
-        Disclosure = false,
-        Title = "Main",
-    })
-
-    local mainTab = mainSection:Tab({
+    local mainTab = section:Tab({
         Selected = true,
         Title = "Main",
     })
 
     local mainForm = mainTab:Form()
 
-    -- Combat
     mainForm:PageSection({ Title = "Combat", Subtitle = "Combat features" })
 
     titledRow(mainForm, "Aimbot", "Locks on to nearest player"):Right():Toggle({
@@ -66,7 +66,6 @@ local ok, err = pcall(function()
         ValueChanged = function(self, val) print("Silent Aim:", val) end,
     })
 
-    -- Movement
     mainForm:PageSection({ Title = "Movement", Subtitle = "Movement features" })
 
     titledRow(mainForm, "Fly", "Fly around the map"):Right():Toggle({
@@ -106,15 +105,7 @@ local ok, err = pcall(function()
     -- ========================================
     -- VISUALS TAB
     -- ========================================
-    local visualsSection = window:Section({
-        Disclosure = false,
-        Title = "Visuals",
-    })
-
-    local visualsTab = visualsSection:Tab({
-        Title = "Visuals",
-    })
-
+    local visualsTab = section:Tab({ Title = "Visuals" })
     local visualsForm = visualsTab:Form()
 
     visualsForm:PageSection({ Title = "ESP", Subtitle = "Player ESP" })
@@ -156,15 +147,7 @@ local ok, err = pcall(function()
     -- ========================================
     -- MISC TAB
     -- ========================================
-    local miscSection = window:Section({
-        Disclosure = false,
-        Title = "Misc",
-    })
-
-    local miscTab = miscSection:Tab({
-        Title = "Misc",
-    })
-
+    local miscTab = section:Tab({ Title = "Misc" })
     local miscForm = miscTab:Form()
 
     miscForm:PageSection({ Title = "Player", Subtitle = "Player features" })
@@ -209,20 +192,11 @@ local ok, err = pcall(function()
     -- ========================================
     -- UI SETTINGS TAB
     -- ========================================
-    local settingsSection = window:Section({
-        Disclosure = false,
-        Title = "UI Settings",
-    })
-
-    local settingsTab = settingsSection:Tab({
-        Title = "UI Settings",
-    })
-
+    local settingsTab = section:Tab({ Title = "UI Settings" })
     local settingsForm = settingsTab:Form()
 
     settingsForm:PageSection({ Title = "Menu", Subtitle = "UI options" })
 
-    -- Keybinds overlay toggle (like Obsidian)
     titledRow(settingsForm, "Keybinds Menu", "Show/hide keybinds panel"):Right():Toggle({
         Value = false,
         ValueChanged = function(self, value)
