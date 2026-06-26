@@ -319,6 +319,7 @@ type Stack__DARKLUA_TYPE_H = BaseComponent__DARKLUA_TYPE_p & Components__DARKLUA
 type TitleStackProperties__DARKLUA_TYPE_I = Frame__DARKLUA_TYPE_g & {
 	Title: string?,
 	Subtitle: string?,
+	Risky: boolean?,
 }
 
 type TitleStack__DARKLUA_TYPE_J = BaseComponent__DARKLUA_TYPE_p & Components__DARKLUA_TYPE_af & TitleStackProperties__DARKLUA_TYPE_I
@@ -567,6 +568,7 @@ end
 
 return utility
 end function __DIST.a():typeof(__modImpl())local v=__DIST.cache.a if not v then v={c=__modImpl()}__DIST.cache.a=v end return v.c end end do local function __modImpl()
+
 
 
 
@@ -13003,6 +13005,15 @@ local binder = __DIST.c()
 		Subtitle = function(value: string)
 			structures.Subtitle.Visible = true
 			structures.Subtitle.Text = value
+		end,
+		Risky = function(value: boolean)
+			if value then
+				structures.Title.TextColor3 = Color3.fromRGB(255, 69, 58)
+				structures.Title.TextTransparency = 0.15
+			else
+				structures.Title.TextColor3 = self.Theme.Text.Primary[1].Value
+				structures.Title.TextTransparency = self.Theme.Text.Primary[2].Value
+			end
 		end,
 	}, structures.Body)
 
