@@ -2189,7 +2189,7 @@ function overlay.Build(parentGui, theme)
 		BackgroundTransparency = 1,
 		Position = UDim2.fromOffset(10, 0),
 		Size = UDim2.new(1, -20, 1, 0),
-		Text = "⌨ Keybinds",
+		Text = "Keybinds",
 		TextSize = 13,
 		FontFace = Font.new("rbxasset://fonts/families/GothamSSm.json", Enum.FontWeight.Bold),
 		TextColor3 = titleColor,
